@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Controle Financeiro Empresarial</title>
+  <!-- Supabase (salvar dados na nuvem sem login) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- Fonte Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,6 +14,9 @@
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  
+  <!-- Supabase (salvar dados na nuvem sem login) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     :root{
@@ -2449,5 +2454,39 @@ document.getElementById("txModal").addEventListener("click", (e)=>{
 
 refreshAll();
 </script>
+  /* ==========================
+   SUPABASE (SEM LOGIN) — CADERNO ÚNICO
+========================== */
+const SUPABASE_URL = "https://hpnxqiyloibtwgspgggd.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_TIh47lHBisUmohfQbp2DlA_sym7n9mc";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// salva tudo no registro key="main"
+async function saveCloud(){
+  const { error } = await supabase
+    .from("app_state")
+    .upsert({
+      key: "main",
+      data: state,
+      updated_at: new Date().toISOString()
+    });
+
+  if (error) console.error("Supabase saveCloud error:", error);
+}
+
+async function loadCloud(){
+  const { data, error } = await supabase
+    .from("app_state")
+    .select("data")
+    .eq("key", "main")
+    .single();
+
+  if (error) {
+    console.error("Supabase loadCloud error:", error);
+    return null;
+  }
+  return data?.data ?? null;
+}
 </body>
 </html>
+
