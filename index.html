@@ -2452,9 +2452,7 @@ document.getElementById("txModal").addEventListener("click", (e)=>{
   if(e.target.id==="txModal") closeTxModal();
 });
 
-(async () => {   // 1) carrega da nuvem   const cloud = await loadCloud();    // 2) se existir algo na nuvem, usa ele   if (cloud) {     state = cloud;     // atualiza cache local     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));   } else {     // se ainda não tiver nada na nuvem, cria o primeiro "main"     await saveCloud();   }    // 3) renderiza tudo   refreshAll(); })();();
-</script>
-  /* ==========================
+/* ==========================
    SUPABASE (SEM LOGIN) — CADERNO ÚNICO
 ========================== */
 const SUPABASE_URL = "https://hpnxqiyloibtwgspgggd.supabase.co";
@@ -2487,7 +2485,27 @@ async function loadCloud(){
   }
   return data?.data ?? null;
 }
+
+(async () => {
+  // 1) carrega da nuvem
+  const cloud = await loadCloud();
+
+  // 2) se existir algo na nuvem, usa ele
+  if (cloud) {
+    state = cloud;
+    // atualiza cache local
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } else {
+    // se ainda não tiver nada na nuvem, cria o primeiro "main"
+    await saveCloud();
+  }
+
+  // 3) renderiza tudo
+  refreshAll();
+})();
+</script>
 </body>
 </html>
+
 
 
