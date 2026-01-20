@@ -1494,7 +1494,6 @@ function go(view){
   document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active", b.dataset.view===view));
   pageTitle.textContent = titles[view][0];
   pageSub.textContent = titles[view][1];
-  ();
 }
 
 function bindNav(container){
@@ -2506,6 +2505,7 @@ async function loadCloud(){
 </script>
 </body>
 </html>
+
 
 
 
