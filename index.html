@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Controle Financeiro Empresarial</title>
-  <!-- Supabase (salvar dados na nuvem sem login) -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- Fonte Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,9 +12,6 @@
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  
-  <!-- Supabase (salvar dados na nuvem sem login) -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     :root{
@@ -1351,22 +1346,17 @@
 /* ==========================
    Chart.js: fonte Inter + legenda bolinha COMPLETA
 ========================== */
-const chartsAvailable = typeof window.Chart !== "undefined";
-if (chartsAvailable) {
-  Chart.defaults.font.family = getComputedStyle(document.documentElement).getPropertyValue("--font").trim() || "Inter";
-  Chart.defaults.font.size = 12;
-  Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue("--muted").trim() || "#7F8C8D";
+Chart.defaults.font.family = getComputedStyle(document.documentElement).getPropertyValue("--font").trim() || "Inter";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue("--muted").trim() || "#7F8C8D";
 
-  /* bolinha redonda (cheia) */
-  Chart.defaults.plugins.legend.labels.usePointStyle = true;
-  Chart.defaults.plugins.legend.labels.pointStyle = "circle";
-  Chart.defaults.plugins.legend.labels.boxWidth = 10;
-  Chart.defaults.plugins.legend.labels.boxHeight = 10;
-  Chart.defaults.plugins.legend.labels.padding = 14;
-  Chart.defaults.plugins.legend.labels.font = { family: Chart.defaults.font.family, size: 12, weight: "700" };
-} else {
-  console.warn("Chart.js não carregou. Gráficos serão desativados nesta sessão.");
-}
+/* bolinha redonda (cheia) */
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.legend.labels.pointStyle = "circle";
+Chart.defaults.plugins.legend.labels.boxWidth = 10;
+Chart.defaults.plugins.legend.labels.boxHeight = 10;
+Chart.defaults.plugins.legend.labels.padding = 14;
+Chart.defaults.plugins.legend.labels.font = { family: Chart.defaults.font.family, size: 12, weight: "700" };
 
 /* ==========================
    Estado + Persistência
@@ -1440,7 +1430,7 @@ const defaultState = {
   transacoes: []
 };
 
-let state = load() || structuredClone(defaultState);
+const state = load() || structuredClone(defaultState);
 bootstrapExamples();
 
 /* ==========================
@@ -1499,6 +1489,7 @@ function go(view){
   document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active", b.dataset.view===view));
   pageTitle.textContent = titles[view][0];
   pageSub.textContent = titles[view][1];
+  refreshAll();
 }
 
 function bindNav(container){
@@ -1626,7 +1617,7 @@ function saveTx(){
 
   save();
   closeTxModal();
-  ();
+  refreshAll();
 }
 
 /* ==========================
@@ -1638,12 +1629,12 @@ function addCanal(){
   if(state.canais.includes(name)) return alert("Esse fluxo já existe.");
   state.canais.push(name);
   document.getElementById("canalName").value = "";
-  save(); ();
+  save(); refreshAll();
 }
 function delCanal(name){
   if(!confirm(`Excluir fluxo "${name}"?`)) return;
   state.canais = state.canais.filter(c=>c!==name);
-  save(); ();
+  save(); refreshAll();
 }
 
 function addCategoria(){
@@ -1651,7 +1642,7 @@ function addCategoria(){
   if(!name) return alert("Digite o nome da categoria.");
   state.categorias.push({ id: uid(), nome: name });
   document.getElementById("catName").value = "";
-  save(); ();
+  save(); refreshAll();
 }
 function addSubcategoria(){
   const categoriaId = document.getElementById("subCatPick").value;
@@ -1660,7 +1651,7 @@ function addSubcategoria(){
   if(!name) return alert("Digite a subcategoria.");
   state.subcategorias.push({ id: uid(), categoriaId, nome: name });
   document.getElementById("subName").value = "";
-  save(); ();
+  save(); refreshAll();
 }
 function addDestino(){
   const subId = document.getElementById("destSubPick").value;
@@ -1670,12 +1661,12 @@ function addDestino(){
   if(!name) return alert("Digite o destino.");
   state.destinos.push({ id: uid(), subId, nome: name, tipo });
   document.getElementById("destName").value = "";
-  save(); ();
+  save(); refreshAll();
 }
 function delCategoria(id){
   if(!confirm("Excluir categoria?")) return;
   state.categorias = state.categorias.filter(c=>c.id!==id);
-  save(); ();
+  save(); refreshAll();
 }
 function delSub(id){
   if(!confirm("Excluir subcategoria?")) return;
@@ -2062,78 +2053,76 @@ function renderMonth(){
   const C_OUT_P = cssVar("--out-pend");
   const C_SALDO = cssVar("--saldo");
 
-  if (chartsAvailable) {
-    // 1) Fluxo de Caixa Diário
-    const daily = buildDailySeries(m);
-    const ctxDaily = document.getElementById("chartDailyCashflow");
-    if(chartDailyCashflow) chartDailyCashflow.destroy();
-    chartDailyCashflow = new Chart(ctxDaily, {
-      type: "line",
-      data:{
-        labels: daily.labels,
-        datasets:[
-          { label:"Entradas (Realizadas)", data: daily.inR,  tension:.25, borderWidth:2, pointRadius:0, borderColor: C_IN_R },
-          { label:"Entradas (Pendentes)",  data: daily.inP,  tension:.25, borderWidth:2, pointRadius:0, borderColor: C_IN_P },
-          { label:"Saídas (Realizadas)",   data: daily.outR, tension:.25, borderWidth:2, pointRadius:0, borderColor: C_OUT_R },
-          { label:"Saídas (Pendentes)",    data: daily.outP, tension:.25, borderWidth:2, pointRadius:0, borderColor: C_OUT_P },
-          { label:"Saldo (Realizadas)",    data: daily.balR, tension:.25, borderWidth:3, pointRadius:0, borderColor: C_SALDO }
-        ]
-      },
-      options:{
-        responsive:true,
-        plugins:{ tooltip:{ callbacks:{ label:(c)=> `${c.dataset.label}: ${money(c.raw)}` } } },
-        scales:{ y:{ ticks:{ callback:(v)=> money(v) } } }
-      }
-    });
+  // 1) Fluxo de Caixa Diário
+  const daily = buildDailySeries(m);
+  const ctxDaily = document.getElementById("chartDailyCashflow");
+  if(chartDailyCashflow) chartDailyCashflow.destroy();
+  chartDailyCashflow = new Chart(ctxDaily, {
+    type: "line",
+    data:{
+      labels: daily.labels,
+      datasets:[
+        { label:"Entradas (Realizadas)", data: daily.inR,  tension:.25, borderWidth:2, pointRadius:0, borderColor: C_IN_R },
+        { label:"Entradas (Pendentes)",  data: daily.inP,  tension:.25, borderWidth:2, pointRadius:0, borderColor: C_IN_P },
+        { label:"Saídas (Realizadas)",   data: daily.outR, tension:.25, borderWidth:2, pointRadius:0, borderColor: C_OUT_R },
+        { label:"Saídas (Pendentes)",    data: daily.outP, tension:.25, borderWidth:2, pointRadius:0, borderColor: C_OUT_P },
+        { label:"Saldo (Realizadas)",    data: daily.balR, tension:.25, borderWidth:3, pointRadius:0, borderColor: C_SALDO }
+      ]
+    },
+    options:{
+      responsive:true,
+      plugins:{ tooltip:{ callbacks:{ label:(c)=> `${c.dataset.label}: ${money(c.raw)}` } } },
+      scales:{ y:{ ticks:{ callback:(v)=> money(v) } } }
+    }
+  });
 
-    // 2) Receitas x Despesas (mês)
-    const ctx = document.getElementById("chartMonth");
-    if(chartMonth) chartMonth.destroy();
-    chartMonth = new Chart(ctx, {
-      type: "bar",
-      data:{
-        labels: ["Entradas", "Saídas"],
-        datasets:[
-          { label:"Realizadas", data:[inR, outR], borderWidth:1, backgroundColor:[C_IN_R, C_OUT_R] },
-          { label:"Pendentes",  data:[inP, outP], borderWidth:1, backgroundColor:[C_IN_P, C_OUT_P] }
-        ]
-      },
-      options:{
-        responsive:true,
-        plugins:{ tooltip:{ callbacks:{ label:(c)=> `${c.dataset.label}: ${money(c.raw)}` } } },
-        scales:{ y:{ ticks:{ callback:(v)=> money(v) } } }
-      }
-    });
+  // 2) Receitas x Despesas (mês)
+  const ctx = document.getElementById("chartMonth");
+  if(chartMonth) chartMonth.destroy();
+  chartMonth = new Chart(ctx, {
+    type: "bar",
+    data:{
+      labels: ["Entradas", "Saídas"],
+      datasets:[
+        { label:"Realizadas", data:[inR, outR], borderWidth:1, backgroundColor:[C_IN_R, C_OUT_R] },
+        { label:"Pendentes",  data:[inP, outP], borderWidth:1, backgroundColor:[C_IN_P, C_OUT_P] }
+      ]
+    },
+    options:{
+      responsive:true,
+      plugins:{ tooltip:{ callbacks:{ label:(c)=> `${c.dataset.label}: ${money(c.raw)}` } } },
+      scales:{ y:{ ticks:{ callback:(v)=> money(v) } } }
+    }
+  });
 
-    // 3) Evolução do saldo
-    const ctxBal = document.getElementById("chartBalanceLine");
-    if(chartBalanceLine) chartBalanceLine.destroy();
-    chartBalanceLine = new Chart(ctxBal, {
-      type:"line",
-      data:{ labels: daily.labels, datasets:[{ label:"Saldo (Realizadas)", data: daily.balR, tension:.25, borderWidth:3, pointRadius:0, borderColor: C_SALDO }] },
-      options:{
-        responsive:true,
-        plugins:{ tooltip:{ callbacks:{ label:(c)=> money(c.raw) } }, legend:{ display:true } },
-        scales:{ y:{ ticks:{ callback:(v)=> money(v) } } }
-      }
-    });
+  // 3) Evolução do saldo
+  const ctxBal = document.getElementById("chartBalanceLine");
+  if(chartBalanceLine) chartBalanceLine.destroy();
+  chartBalanceLine = new Chart(ctxBal, {
+    type:"line",
+    data:{ labels: daily.labels, datasets:[{ label:"Saldo (Realizadas)", data: daily.balR, tension:.25, borderWidth:3, pointRadius:0, borderColor: C_SALDO }] },
+    options:{
+      responsive:true,
+      plugins:{ tooltip:{ callbacks:{ label:(c)=> money(c.raw) } }, legend:{ display:true } },
+      scales:{ y:{ ticks:{ callback:(v)=> money(v) } } }
+    }
+  });
 
-    // 4) Distribuição
-    const ctxShare = document.getElementById("chartFlowShare");
-    if(chartFlowShare) chartFlowShare.destroy();
-    chartFlowShare = new Chart(ctxShare, {
-      type:"bar",
-      data:{
-        labels:["Entradas (R)", "Entradas (P)", "Saídas (R)", "Saídas (P)"],
-        datasets:[{ label:"R$", data:[inR, inP, outR, outP], backgroundColor:[C_IN_R, C_IN_P, C_OUT_R, C_OUT_P], borderWidth:1 }]
-      },
-      options:{
-        responsive:true,
-        plugins:{ tooltip:{ callbacks:{ label:(c)=> money(c.raw) } } },
-        scales:{ y:{ ticks:{ callback:(v)=> money(v) } } }
-      }
-    });
-  }
+  // 4) Distribuição
+  const ctxShare = document.getElementById("chartFlowShare");
+  if(chartFlowShare) chartFlowShare.destroy();
+  chartFlowShare = new Chart(ctxShare, {
+    type:"bar",
+    data:{
+      labels:["Entradas (R)", "Entradas (P)", "Saídas (R)", "Saídas (P)"],
+      datasets:[{ label:"R$", data:[inR, inP, outR, outP], backgroundColor:[C_IN_R, C_IN_P, C_OUT_R, C_OUT_P], borderWidth:1 }]
+    },
+    options:{
+      responsive:true,
+      plugins:{ tooltip:{ callbacks:{ label:(c)=> money(c.raw) } } },
+      scales:{ y:{ ticks:{ callback:(v)=> money(v) } } }
+    }
+  });
 
   renderMonthGroup();
 }
@@ -2356,36 +2345,34 @@ function renderYear(){
     tbody.appendChild(tr);
   });
 
-if (chartsAvailable) {
-    const ctx = document.getElementById("chartYear");
-    const labels = rows.map(r=>{
-      const [yy, mm] = r.key.split("-");
-      const dt = new Date(Number(yy), Number(mm)-1, 1);
-      return dt.toLocaleDateString("pt-BR",{ month:"short" });
-    });
+  const ctx = document.getElementById("chartYear");
+  const labels = rows.map(r=>{
+    const [yy, mm] = r.key.split("-");
+    const dt = new Date(Number(yy), Number(mm)-1, 1);
+    return dt.toLocaleDateString("pt-BR",{ month:"short" });
+  });
 
-    const C_IN_R  = cssVar("--in-real");
-    const C_OUT_R = cssVar("--out-real");
+  const C_IN_R  = cssVar("--in-real");
+  const C_OUT_R = cssVar("--out-real");
 
-    const data = {
-      labels,
-      datasets:[
-        { label:"Entradas (realizadas)", data: rows.map(r=>r.rev), borderWidth:1, backgroundColor: C_IN_R },
-        { label:"Saídas (realizadas)",   data: rows.map(r=>r.exp), borderWidth:1, backgroundColor: C_OUT_R },
-      ]
-    };
+  const data = {
+    labels,
+    datasets:[
+      { label:"Entradas (realizadas)", data: rows.map(r=>r.rev), borderWidth:1, backgroundColor: C_IN_R },
+      { label:"Saídas (realizadas)",   data: rows.map(r=>r.exp), borderWidth:1, backgroundColor: C_OUT_R },
+    ]
+  };
 
-    if(chartYear) chartYear.destroy();
-    chartYear = new Chart(ctx, {
-      type:"bar",
-      data,
-      options:{
-        responsive:true,
-        plugins:{ tooltip:{ callbacks:{ label:(c)=> `${c.dataset.label}: ${money(c.raw)}` } } },
-        scales:{ y:{ ticks:{ callback:(v)=> money(v) } } }
-      }
-    });
-  }
+  if(chartYear) chartYear.destroy();
+  chartYear = new Chart(ctx, {
+    type:"bar",
+    data,
+    options:{
+      responsive:true,
+      plugins:{ tooltip:{ callbacks:{ label:(c)=> `${c.dataset.label}: ${money(c.raw)}` } } },
+      scales:{ y:{ ticks:{ callback:(v)=> money(v) } } }
+    }
+  });
 }
 document.getElementById("yearPick").addEventListener("change", renderYear);
 
@@ -2460,62 +2447,7 @@ document.getElementById("txModal").addEventListener("click", (e)=>{
   if(e.target.id==="txModal") closeTxModal();
 });
 
-/* ==========================
-   SUPABASE (SEM LOGIN) — CADERNO ÚNICO
-========================== */
-const SUPABASE_URL = "https://hpnxqiyloibtwgspgggd.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_TIh47lHBisUmohfQbp2DlA_sym7n9mc";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// salva tudo no registro key="main"
-async function saveCloud(){
-  const { error } = await supabase
-    .from("app_state")
-    .upsert({
-      key: "main",
-      data: state,
-      updated_at: new Date().toISOString()
-    });
-
-  if (error) console.error("Supabase saveCloud error:", error);
-}
-
-async function loadCloud(){
-  const { data, error } = await supabase
-    .from("app_state")
-    .select("data")
-    .eq("key", "main")
-    .single();
-
-  if (error) {
-    console.error("Supabase loadCloud error:", error);
-    return null;
-  }
-  return data?.data ?? null;
-}
-
-(async () => {
-  // 1) carrega da nuvem
-  const cloud = await loadCloud();
-
-  // 2) se existir algo na nuvem, usa ele
-  if (cloud) {
-    state = cloud;
-    // atualiza cache local
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } else {
-    // se ainda não tiver nada na nuvem, cria o primeiro "main"
-    await saveCloud();
-  }
-
-  // 3) renderiza tudo
-  refreshAll();
-})();
+refreshAll();
 </script>
 </body>
 </html>
-
-
-
-
-
