@@ -1435,7 +1435,7 @@ const defaultState = {
   transacoes: []
 };
 
-const state = load() || structuredClone(defaultState);
+let state = load() || structuredClone(defaultState);
 bootstrapExamples();
 
 /* ==========================
@@ -1494,7 +1494,7 @@ function go(view){
   document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active", b.dataset.view===view));
   pageTitle.textContent = titles[view][0];
   pageSub.textContent = titles[view][1];
-  refreshAll();
+  ();
 }
 
 function bindNav(container){
@@ -1622,7 +1622,7 @@ function saveTx(){
 
   save();
   closeTxModal();
-  refreshAll();
+  ();
 }
 
 /* ==========================
@@ -1634,12 +1634,12 @@ function addCanal(){
   if(state.canais.includes(name)) return alert("Esse fluxo já existe.");
   state.canais.push(name);
   document.getElementById("canalName").value = "";
-  save(); refreshAll();
+  save(); ();
 }
 function delCanal(name){
   if(!confirm(`Excluir fluxo "${name}"?`)) return;
   state.canais = state.canais.filter(c=>c!==name);
-  save(); refreshAll();
+  save(); ();
 }
 
 function addCategoria(){
@@ -1647,7 +1647,7 @@ function addCategoria(){
   if(!name) return alert("Digite o nome da categoria.");
   state.categorias.push({ id: uid(), nome: name });
   document.getElementById("catName").value = "";
-  save(); refreshAll();
+  save(); ();
 }
 function addSubcategoria(){
   const categoriaId = document.getElementById("subCatPick").value;
@@ -1656,7 +1656,7 @@ function addSubcategoria(){
   if(!name) return alert("Digite a subcategoria.");
   state.subcategorias.push({ id: uid(), categoriaId, nome: name });
   document.getElementById("subName").value = "";
-  save(); refreshAll();
+  save(); ();
 }
 function addDestino(){
   const subId = document.getElementById("destSubPick").value;
@@ -1666,12 +1666,12 @@ function addDestino(){
   if(!name) return alert("Digite o destino.");
   state.destinos.push({ id: uid(), subId, nome: name, tipo });
   document.getElementById("destName").value = "";
-  save(); refreshAll();
+  save(); ();
 }
 function delCategoria(id){
   if(!confirm("Excluir categoria?")) return;
   state.categorias = state.categorias.filter(c=>c.id!==id);
-  save(); refreshAll();
+  save(); ();
 }
 function delSub(id){
   if(!confirm("Excluir subcategoria?")) return;
@@ -2452,7 +2452,7 @@ document.getElementById("txModal").addEventListener("click", (e)=>{
   if(e.target.id==="txModal") closeTxModal();
 });
 
-refreshAll();
+(async () => {   // 1) carrega da nuvem   const cloud = await loadCloud();    // 2) se existir algo na nuvem, usa ele   if (cloud) {     state = cloud;     // atualiza cache local     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));   } else {     // se ainda não tiver nada na nuvem, cria o primeiro "main"     await saveCloud();   }    // 3) renderiza tudo   refreshAll(); })();();
 </script>
   /* ==========================
    SUPABASE (SEM LOGIN) — CADERNO ÚNICO
@@ -2489,4 +2489,5 @@ async function loadCloud(){
 }
 </body>
 </html>
+
 
