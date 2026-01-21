@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -13,40 +13,37 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
+  <!-- Supabase (salvar dados na nuvem sem login) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     :root{
       /* Fundo / texto */
       --bg:#ECECEC;
       --card:#ffffff;
-      --text:#113466;     /* azul petróleo/marinho */
-      --muted:#7F8C8D;    /* texto secundário */
+      --text:#113466;
+      --muted:#7F8C8D;
       --line:#E5E7E9;
 
       /* Destaques */
-      --primary:#3DB7B6;  /* turquesa */
+      --primary:#3DB7B6;
       --primary-2:#113466;
 
-      /* Cores “do seu design” */
-      --lime:#C1C919;     /* verde claro limão */
-      --olive:#446F09;    /* verde musgo/oliva */
-      --yellow:#FFD000;   /* amarelo vivo */
-      --coral:#FF4948;    /* vermelho coral */
-      --navy:#113466;     /* azul petróleo/marinho */
-      --teal:#3DB7B6;     /* turquesa */
+      --lime:#C1C919;
+      --olive:#446F09;
+      --yellow:#FFD000;
+      --coral:#FF4948;
+      --navy:#113466;
+      --teal:#3DB7B6;
 
-      /* ===== Mapeamento sistema (AJUSTADO) =====
-         - Saídas pendentes: LARANJA (pedido)
-         - Saldo: AZUL PETRÓLEO (pedido)
-      */
-      --in-real:  #446F09;  /* entradas realizadas (verde escuro) */
-      --in-pend:  #C1C919;  /* entradas pendentes  (verde claro) */
+      --in-real:  #446F09;
+      --in-pend:  #C1C919;
 
-      --out-real: #FF7A18;  /* saídas realizadas  (laranja escuro) */
-      --out-pend: #FFB04A;  /* saídas pendentes   (laranja claro) */
+      --out-real: #FF7A18;
+      --out-pend: #FFB04A;
 
-      --saldo:    #113466;  /* saldo (azul petróleo) */
+      --saldo:    #113466;
 
-      /* Tintas (fundinhos suaves) */
       --tint-in-real:  rgba(68,111,9,.12);
       --tint-in-pend:  rgba(193,201,25,.18);
 
@@ -76,7 +73,6 @@
       min-height:100vh;
     }
 
-    /* Sidebar neutra (sem verde) */
     .sidebar{
       position:sticky;
       top:0;
@@ -134,7 +130,7 @@
       color: var(--text);
       font-size:14px;
       font-weight:600;
-      font-family: var(--font); /* (pedido) botões Inter */
+      font-family: var(--font);
       transition: .15s ease;
     }
     .nav button:hover{ background: rgba(17,52,102,.06); }
@@ -180,6 +176,7 @@
       background:#fff;
       font-family: var(--font);
       font-weight:700;
+      white-space:nowrap;
     }
 
     .btn{
@@ -191,7 +188,7 @@
       font-weight:700;
       font-size:13px;
       color: var(--text);
-      font-family: var(--font); /* (pedido) botões Inter */
+      font-family: var(--font);
       transition:.15s ease;
     }
     .btn:hover{ transform: translateY(-1px); box-shadow: 0 10px 18px rgba(15,23,42,.08); }
@@ -270,12 +267,10 @@
     .kpi .value{ font-size:20px; font-weight:800; letter-spacing:-0.03em; }
     .kpi .sub{ font-size:12px; color: var(--muted); margin-top:4px; font-weight:600; }
 
-    /* (pedido) cor do valor seguir a cor do “gráfico/série” */
     .kpi.revenue .value{ color: var(--in-real); }
     .kpi.expense .value{ color: var(--out-real); }
     .kpi.balance .value{ color: var(--saldo); }
 
-    /* (pedido) “pendentes” colorido também */
     .subLine .dot{
       width:10px; height:10px; border-radius:999px;
       display:inline-block; margin-right:6px; vertical-align:middle;
@@ -297,7 +292,6 @@
       color: var(--navy);
     }
 
-    /* (pedido) detalhe colorido igual ao gráfico */
     .kpi.revenue{ border-left: 6px solid rgba(68,111,9,.65); }
     .kpi.expense{ border-left: 6px solid rgba(255,122,24,.70); }
     .kpi.balance{ border-left: 6px solid rgba(17,52,102,.65); }
@@ -349,7 +343,6 @@
     th{ color: var(--muted); font-weight:800; background: rgba(236,236,236,.55); }
     tr:hover td{ background: rgba(17,52,102,.03); }
 
-    /* Tags */
     .tag{
       display:inline-flex;
       align-items:center;
@@ -369,7 +362,6 @@
     .tag.out-real{ border-color: rgba(255,122,24,.30); background: var(--tint-out-real); color: var(--out-real); }
     .tag.out-pend{ border-color: rgba(255,176,74,.30); background: var(--tint-out-pend); color: #8a4b00; }
 
-    /* (pedido) cor do dinheiro/valor também (tabela) */
     .moneyVal{ font-weight:900; }
     .moneyVal.in-real{ color: var(--in-real); }
     .moneyVal.in-pend{ color: var(--in-pend); }
@@ -453,7 +445,7 @@
       align-items:center;
       gap:5px;
       font-weight:800;
-      font-family: var(--font); /* (pedido) botões Inter */
+      font-family: var(--font);
     }
     .mobileNav button.active{
       background: rgba(61,183,182,.18);
@@ -465,18 +457,6 @@
     .hr{ height:1px; background: rgba(229,231,233,.95); margin: 12px 0; }
     .small{ font-size:12px; }
 
-    /* Banco de Dados em listas */
-    .listBlock{
-      border:1px solid var(--line);
-      border-radius: 14px;
-      padding: 10px;
-      background:#fff;
-    }
-    .listTitle{
-      font-weight:900;
-      margin: 0 0 10px;
-      letter-spacing:-0.02em;
-    }
     .list{
       display:flex;
       flex-direction:column;
@@ -597,6 +577,7 @@
 
       <div class="actions">
         <span class="pill" id="pillNow">—</span>
+        <span class="pill" id="pillSync">☁️ Sync: iniciando…</span>
         <button class="btn ghost" id="btnExport">Exportar JSON</button>
         <button class="btn primary" id="btnQuickAdd">+ Nova transação</button>
       </div>
@@ -915,7 +896,6 @@
             </div>
 
             <div class="cardBody">
-              <!-- filtros do detalhamento -->
               <div class="formGrid" style="grid-template-columns: 160px 170px 200px 160px 160px 1fr; margin-top:10px;">
                 <div class="field">
                   <label>Tipo</label>
@@ -1105,11 +1085,10 @@
       </div>
     </section>
 
-    <!-- BANCO DE DADOS (LISTAS SIMPLES) -->
+    <!-- BANCO DE DADOS -->
     <section class="view" id="view-db">
       <div class="grid" style="grid-template-columns: 1fr 1fr;">
 
-        <!-- Fluxos -->
         <div class="card">
           <div class="cardHeader">
             <div>
@@ -1133,7 +1112,6 @@
           </div>
         </div>
 
-        <!-- Categorias -->
         <div class="card">
           <div class="cardHeader">
             <div>
@@ -1157,7 +1135,6 @@
           </div>
         </div>
 
-        <!-- Subcategorias -->
         <div class="card">
           <div class="cardHeader">
             <div>
@@ -1184,7 +1161,6 @@
           </div>
         </div>
 
-        <!-- Destinos -->
         <div class="card">
           <div class="cardHeader">
             <div>
@@ -1349,8 +1325,6 @@
 Chart.defaults.font.family = getComputedStyle(document.documentElement).getPropertyValue("--font").trim() || "Inter";
 Chart.defaults.font.size = 12;
 Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue("--muted").trim() || "#7F8C8D";
-
-/* bolinha redonda (cheia) */
 Chart.defaults.plugins.legend.labels.usePointStyle = true;
 Chart.defaults.plugins.legend.labels.pointStyle = "circle";
 Chart.defaults.plugins.legend.labels.boxWidth = 10;
@@ -1359,18 +1333,90 @@ Chart.defaults.plugins.legend.labels.padding = 14;
 Chart.defaults.plugins.legend.labels.font = { family: Chart.defaults.font.family, size: 12, weight: "700" };
 
 /* ==========================
-   Estado + Persistência
+   SUPABASE (SEM LOGIN) — CADERNO ÚNICO
+========================== */
+const SUPABASE_URL = "https://hpnxqiyloibtwgspgggd.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_TIh47lHBisUmohfQbp2DlA_sym7n9mc";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const CLOUD_TABLE = "app_state";
+const CLOUD_KEY = "main";
+
+/* UI sync pill */
+const pillSync = document.getElementById("pillSync");
+function setSync(status){
+  if(!pillSync) return;
+  pillSync.textContent = status;
+}
+
+/* ==========================
+   Estado + Persistência (LOCAL + CLOUD)
 ========================== */
 const STORAGE_KEY = "dv_finance_v4_inter_newpalette_db_list";
 
+/* util */
 function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(2,6); }
-function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-function load(){
+function safeClone(obj){
+  try{ return structuredClone(obj); } catch(e){ return JSON.parse(JSON.stringify(obj)); }
+}
+function saveLocal(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function loadLocal(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : null;
   }catch(e){ return null; }
 }
+
+/* Cloud load/save */
+async function loadCloud(){
+  try{
+    setSync("☁️ Sync: carregando…");
+    const { data, error } = await supabase
+      .from(CLOUD_TABLE)
+      .select("data, updated_at")
+      .eq("key", CLOUD_KEY)
+      .maybeSingle();
+
+    if(error) throw error;
+    if(!data || !data.data){
+      setSync("☁️ Sync: sem dados (nuvem)");
+      return null;
+    }
+    setSync("☁️ Sync: ok");
+    return data.data;
+  }catch(err){
+    console.warn("loadCloud erro:", err);
+    setSync("☁️ Sync: offline/erro");
+    return null;
+  }
+}
+
+let saveCloudTimer = null;
+async function saveCloudNow(){
+  try{
+    setSync("☁️ Sync: salvando…");
+    const payload = { key: CLOUD_KEY, data: state, updated_at: new Date().toISOString() };
+    const { error } = await supabase
+      .from(CLOUD_TABLE)
+      .upsert(payload, { onConflict: "key" });
+
+    if(error) throw error;
+    setSync("☁️ Sync: salvo ✅");
+  }catch(err){
+    console.warn("saveCloud erro:", err);
+    setSync("☁️ Sync: falhou (salvo local)");
+  }
+}
+function save(){
+  // sempre salva local (rápido)
+  saveLocal();
+
+  // salva cloud com debounce (não spammar)
+  if(saveCloudTimer) clearTimeout(saveCloudTimer);
+  saveCloudTimer = setTimeout(()=>{ saveCloudNow(); }, 600);
+}
+
+/* formatações */
 function money(n){
   const v = Number(n || 0);
   return v.toLocaleString("pt-BR", { style:"currency", currency:"BRL" });
@@ -1408,6 +1454,7 @@ function escapeHtml(str){
 }
 function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 
+/* Estado default */
 const defaultState = {
   canais: ["Dinheiro", "Banco/Pix", "Cartão Débito", "Cartão Crédito", "iFood", "Outros"],
   categorias: [
@@ -1430,8 +1477,70 @@ const defaultState = {
   transacoes: []
 };
 
-const state = load() || structuredClone(defaultState);
-bootstrapExamples();
+/* IMPORTANTE: state agora é LET (vai vir da nuvem) */
+let state = safeClone(defaultState);
+
+/* ==========================
+   Init: pega da nuvem (senão local), arruma exemplos e renderiza
+========================== */
+async function initApp(){
+  // 1) tenta cloud
+  const cloud = await loadCloud();
+
+  // 2) se não tiver cloud, tenta local
+  const local = loadLocal();
+
+  // prioridade: cloud > local > default
+  if(cloud && typeof cloud === "object"){
+    state = cloud;
+    saveLocal(); // cache local
+  } else if(local && typeof local === "object"){
+    state = local;
+    // opcional: sobe local para cloud se nuvem estava vazia
+    saveCloudNow();
+  } else {
+    state = safeClone(defaultState);
+    saveLocal();
+    saveCloudNow();
+  }
+
+  bootstrapExamples();
+  refreshAll();
+}
+
+bootstrapExamples = function(){
+  const catVendas = state.categorias.find(c=>c.nome==="Vendas");
+  const catFixas  = state.categorias.find(c=>c.nome==="Despesas Fixas");
+  const catMP     = state.categorias.find(c=>c.nome==="Matéria-prima");
+
+  state.subcategorias.forEach(s=>{
+    if(s.categoriaId) return;
+    if(s.nome==="Balcão" || s.nome==="iFood") s.categoriaId = catVendas?.id || null;
+    else if(s.nome==="Energia") s.categoriaId = catFixas?.id || null;
+    else if(s.nome==="Farinha") s.categoriaId = catMP?.id || null;
+  });
+
+  const subBalcao  = state.subcategorias.find(s=>s.nome==="Balcão");
+  const subIFood   = state.subcategorias.find(s=>s.nome==="iFood");
+  const subEnergia = state.subcategorias.find(s=>s.nome==="Energia");
+  const subFarinha = state.subcategorias.find(s=>s.nome==="Farinha");
+
+  state.destinos.forEach(d=>{
+    if(d.subId) return;
+    if(d.nome.includes("Balcão")) d.subId = subBalcao?.id || null;
+    else if(d.nome.includes("iFood")) d.subId = subIFood?.id || null;
+    else if(d.nome.includes("Energia") || d.nome.includes("CPFL")) d.subId = subEnergia?.id || null;
+    else if(d.nome.includes("Farinha")) d.subId = subFarinha?.id || null;
+  });
+
+  state.transacoes.forEach(t=>{
+    if(!t.canal) t.canal = (state.canais && state.canais[0]) ? state.canais[0] : "Dinheiro";
+    if(!t.status) t.status = "realizada";
+  });
+
+  // salva usando nosso save (local + cloud)
+  save();
+};
 
 /* ==========================
    Finds
@@ -1905,7 +2014,6 @@ function renderDash(){
   document.getElementById("kpiExp").textContent = money(s.expR);
   document.getElementById("kpiBal").textContent = money(s.balR);
 
-  // sublinhas com cores (pedido)
   document.getElementById("kpiRevSub").innerHTML =
     `<div class="subLine">
       <span class="part"><span class="dot" style="color:var(--in-real)"></span>${s.countR} realizadas</span>
@@ -2018,7 +2126,7 @@ function buildDailySeries(monthStr){
 
   let acc = 0;
   const balR = days.map((d, i)=>{
-    acc += (inR[i] - outR[i]);  // saldo apenas realizadas
+    acc += (inR[i] - outR[i]);
     return acc;
   });
 
@@ -2039,7 +2147,6 @@ function renderMonth(){
   document.getElementById("mExp").textContent = money(outR);
   document.getElementById("mBal").textContent = money(inR - outR);
 
-  // (pedido) pendentes em cor do gráfico
   document.getElementById("mRevSub").innerHTML =
     `<span class="subLine"><span class="part inPend"><span class="dot"></span>Pendentes: ${money(inP)}</span></span>`;
   document.getElementById("mExpSub").innerHTML =
@@ -2053,7 +2160,6 @@ function renderMonth(){
   const C_OUT_P = cssVar("--out-pend");
   const C_SALDO = cssVar("--saldo");
 
-  // 1) Fluxo de Caixa Diário
   const daily = buildDailySeries(m);
   const ctxDaily = document.getElementById("chartDailyCashflow");
   if(chartDailyCashflow) chartDailyCashflow.destroy();
@@ -2076,7 +2182,6 @@ function renderMonth(){
     }
   });
 
-  // 2) Receitas x Despesas (mês)
   const ctx = document.getElementById("chartMonth");
   if(chartMonth) chartMonth.destroy();
   chartMonth = new Chart(ctx, {
@@ -2095,7 +2200,6 @@ function renderMonth(){
     }
   });
 
-  // 3) Evolução do saldo
   const ctxBal = document.getElementById("chartBalanceLine");
   if(chartBalanceLine) chartBalanceLine.destroy();
   chartBalanceLine = new Chart(ctxBal, {
@@ -2108,7 +2212,6 @@ function renderMonth(){
     }
   });
 
-  // 4) Distribuição
   const ctxShare = document.getElementById("chartFlowShare");
   if(chartFlowShare) chartFlowShare.destroy();
   chartFlowShare = new Chart(ctxShare, {
@@ -2127,7 +2230,6 @@ function renderMonth(){
   renderMonthGroup();
 }
 
-/* ====== Agrupamento com soma + filtros (Categoria/Sub/Destino) + Data ====== */
 function applyMonthlyDetailFilters(list){
   const fTipo = (document.getElementById("mFilterTipo")?.value || "");
   const fStatus = (document.getElementById("mFilterStatus")?.value || "");
@@ -2390,42 +2492,6 @@ document.getElementById("btnExport").addEventListener("click", ()=>{
 });
 
 /* ==========================
-   Bootstrap
-========================== */
-function bootstrapExamples(){
-  const catVendas = state.categorias.find(c=>c.nome==="Vendas");
-  const catFixas  = state.categorias.find(c=>c.nome==="Despesas Fixas");
-  const catMP     = state.categorias.find(c=>c.nome==="Matéria-prima");
-
-  state.subcategorias.forEach(s=>{
-    if(s.categoriaId) return;
-    if(s.nome==="Balcão" || s.nome==="iFood") s.categoriaId = catVendas?.id || null;
-    else if(s.nome==="Energia") s.categoriaId = catFixas?.id || null;
-    else if(s.nome==="Farinha") s.categoriaId = catMP?.id || null;
-  });
-
-  const subBalcao  = state.subcategorias.find(s=>s.nome==="Balcão");
-  const subIFood   = state.subcategorias.find(s=>s.nome==="iFood");
-  const subEnergia = state.subcategorias.find(s=>s.nome==="Energia");
-  const subFarinha = state.subcategorias.find(s=>s.nome==="Farinha");
-
-  state.destinos.forEach(d=>{
-    if(d.subId) return;
-    if(d.nome.includes("Balcão")) d.subId = subBalcao?.id || null;
-    else if(d.nome.includes("iFood")) d.subId = subIFood?.id || null;
-    else if(d.nome.includes("Energia") || d.nome.includes("CPFL")) d.subId = subEnergia?.id || null;
-    else if(d.nome.includes("Farinha")) d.subId = subFarinha?.id || null;
-  });
-
-  state.transacoes.forEach(t=>{
-    if(!t.canal) t.canal = (state.canais && state.canais[0]) ? state.canais[0] : "Dinheiro";
-    if(!t.status) t.status = "realizada";
-  });
-
-  save();
-}
-
-/* ==========================
    Refresh geral
 ========================== */
 function refreshAll(){
@@ -2447,7 +2513,8 @@ document.getElementById("txModal").addEventListener("click", (e)=>{
   if(e.target.id==="txModal") closeTxModal();
 });
 
-refreshAll();
+/* START APP (cloud first) */
+initApp();
 </script>
 </body>
 </html>
