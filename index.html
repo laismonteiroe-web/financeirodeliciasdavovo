@@ -1322,15 +1322,18 @@
 /* ==========================
    Chart.js: fonte Inter + legenda bolinha COMPLETA
 ========================== */
-Chart.defaults.font.family = getComputedStyle(document.documentElement).getPropertyValue("--font").trim() || "Inter";
-Chart.defaults.font.size = 12;
-Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue("--muted").trim() || "#7F8C8D";
-Chart.defaults.plugins.legend.labels.usePointStyle = true;
-Chart.defaults.plugins.legend.labels.pointStyle = "circle";
-Chart.defaults.plugins.legend.labels.boxWidth = 10;
-Chart.defaults.plugins.legend.labels.boxHeight = 10;
-Chart.defaults.plugins.legend.labels.padding = 14;
-Chart.defaults.plugins.legend.labels.font = { family: Chart.defaults.font.family, size: 12, weight: "700" };
+const hasChart = typeof window.Chart !== "undefined";
+if(hasChart){
+  Chart.defaults.font.family = getComputedStyle(document.documentElement).getPropertyValue("--font").trim() || "Inter";
+  Chart.defaults.font.size = 12;
+  Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue("--muted").trim() || "#7F8C8D";
+  Chart.defaults.plugins.legend.labels.usePointStyle = true;
+  Chart.defaults.plugins.legend.labels.pointStyle = "circle";
+  Chart.defaults.plugins.legend.labels.boxWidth = 10;
+  Chart.defaults.plugins.legend.labels.boxHeight = 10;
+  Chart.defaults.plugins.legend.labels.padding = 14;
+  Chart.defaults.plugins.legend.labels.font = { family: Chart.defaults.font.family, size: 12, weight: "700" };
+}
 
 /* ==========================
    SUPABASE (SEM LOGIN) — CADERNO ÚNICO
@@ -2161,71 +2164,73 @@ function renderMonth(){
   const C_SALDO = cssVar("--saldo");
 
   const daily = buildDailySeries(m);
-  const ctxDaily = document.getElementById("chartDailyCashflow");
-  if(chartDailyCashflow) chartDailyCashflow.destroy();
-  chartDailyCashflow = new Chart(ctxDaily, {
-    type: "line",
-    data:{
-      labels: daily.labels,
-      datasets:[
-        { label:"Entradas (Realizadas)", data: daily.inR,  tension:.25, borderWidth:2, pointRadius:0, borderColor: C_IN_R },
-        { label:"Entradas (Pendentes)",  data: daily.inP,  tension:.25, borderWidth:2, pointRadius:0, borderColor: C_IN_P },
-        { label:"Saídas (Realizadas)",   data: daily.outR, tension:.25, borderWidth:2, pointRadius:0, borderColor: C_OUT_R },
-        { label:"Saídas (Pendentes)",    data: daily.outP, tension:.25, borderWidth:2, pointRadius:0, borderColor: C_OUT_P },
-        { label:"Saldo (Realizadas)",    data: daily.balR, tension:.25, borderWidth:3, pointRadius:0, borderColor: C_SALDO }
-      ]
-    },
-    options:{
-      responsive:true,
-      plugins:{ tooltip:{ callbacks:{ label:(c)=> `${c.dataset.label}: ${money(c.raw)}` } } },
-      scales:{ y:{ ticks:{ callback:(v)=> money(v) } } }
-    }
-  });
+  if(hasChart){
+    const ctxDaily = document.getElementById("chartDailyCashflow");
+    if(chartDailyCashflow) chartDailyCashflow.destroy();
+    chartDailyCashflow = new Chart(ctxDaily, {
+      type: "line",
+      data:{
+        labels: daily.labels,
+        datasets:[
+          { label:"Entradas (Realizadas)", data: daily.inR,  tension:.25, borderWidth:2, pointRadius:0, borderColor: C_IN_R },
+          { label:"Entradas (Pendentes)",  data: daily.inP,  tension:.25, borderWidth:2, pointRadius:0, borderColor: C_IN_P },
+          { label:"Saídas (Realizadas)",   data: daily.outR, tension:.25, borderWidth:2, pointRadius:0, borderColor: C_OUT_R },
+          { label:"Saídas (Pendentes)",    data: daily.outP, tension:.25, borderWidth:2, pointRadius:0, borderColor: C_OUT_P },
+          { label:"Saldo (Realizadas)",    data: daily.balR, tension:.25, borderWidth:3, pointRadius:0, borderColor: C_SALDO }
+        ]
+      },
+      options:{
+        responsive:true,
+        plugins:{ tooltip:{ callbacks:{ label:(c)=> `${c.dataset.label}: ${money(c.raw)}` } } },
+        scales:{ y:{ ticks:{ callback:(v)=> money(v) } } }
+      }
+    });
 
-  const ctx = document.getElementById("chartMonth");
-  if(chartMonth) chartMonth.destroy();
-  chartMonth = new Chart(ctx, {
-    type: "bar",
-    data:{
-      labels: ["Entradas", "Saídas"],
-      datasets:[
-        { label:"Realizadas", data:[inR, outR], borderWidth:1, backgroundColor:[C_IN_R, C_OUT_R] },
-        { label:"Pendentes",  data:[inP, outP], borderWidth:1, backgroundColor:[C_IN_P, C_OUT_P] }
-      ]
-    },
-    options:{
-      responsive:true,
-      plugins:{ tooltip:{ callbacks:{ label:(c)=> `${c.dataset.label}: ${money(c.raw)}` } } },
-      scales:{ y:{ ticks:{ callback:(v)=> money(v) } } }
-    }
-  });
+    const ctx = document.getElementById("chartMonth");
+    if(chartMonth) chartMonth.destroy();
+    chartMonth = new Chart(ctx, {
+      type: "bar",
+      data:{
+        labels: ["Entradas", "Saídas"],
+        datasets:[
+          { label:"Realizadas", data:[inR, outR], borderWidth:1, backgroundColor:[C_IN_R, C_OUT_R] },
+          { label:"Pendentes",  data:[inP, outP], borderWidth:1, backgroundColor:[C_IN_P, C_OUT_P] }
+        ]
+      },
+      options:{
+        responsive:true,
+        plugins:{ tooltip:{ callbacks:{ label:(c)=> `${c.dataset.label}: ${money(c.raw)}` } } },
+        scales:{ y:{ ticks:{ callback:(v)=> money(v) } } }
+      }
+    });
 
-  const ctxBal = document.getElementById("chartBalanceLine");
-  if(chartBalanceLine) chartBalanceLine.destroy();
-  chartBalanceLine = new Chart(ctxBal, {
-    type:"line",
-    data:{ labels: daily.labels, datasets:[{ label:"Saldo (Realizadas)", data: daily.balR, tension:.25, borderWidth:3, pointRadius:0, borderColor: C_SALDO }] },
-    options:{
-      responsive:true,
-      plugins:{ tooltip:{ callbacks:{ label:(c)=> money(c.raw) } }, legend:{ display:true } },
-      scales:{ y:{ ticks:{ callback:(v)=> money(v) } } }
-    }
-  });
+    const ctxBal = document.getElementById("chartBalanceLine");
+    if(chartBalanceLine) chartBalanceLine.destroy();
+    chartBalanceLine = new Chart(ctxBal, {
+      type:"line",
+      data:{ labels: daily.labels, datasets:[{ label:"Saldo (Realizadas)", data: daily.balR, tension:.25, borderWidth:3, pointRadius:0, borderColor: C_SALDO }] },
+      options:{
+        responsive:true,
+        plugins:{ tooltip:{ callbacks:{ label:(c)=> money(c.raw) } }, legend:{ display:true } },
+        scales:{ y:{ ticks:{ callback:(v)=> money(v) } } }
+      }
+    });
 
-  const ctxShare = document.getElementById("chartFlowShare");
-  if(chartFlowShare) chartFlowShare.destroy();
-  chartFlowShare = new Chart(ctxShare, {
-    type:"bar",
-    data:{
-      labels:["Entradas (R)", "Entradas (P)", "Saídas (R)", "Saídas (P)"],
-      datasets:[{ label:"R$", data:[inR, inP, outR, outP], backgroundColor:[C_IN_R, C_IN_P, C_OUT_R, C_OUT_P], borderWidth:1 }]
-    },
-    options:{
-      responsive:true,
-      plugins:{ tooltip:{ callbacks:{ label:(c)=> money(c.raw) } } },
-      scales:{ y:{ ticks:{ callback:(v)=> money(v) } } }
-    }
-  });
+    const ctxShare = document.getElementById("chartFlowShare");
+    if(chartFlowShare) chartFlowShare.destroy();
+    chartFlowShare = new Chart(ctxShare, {
+      type:"bar",
+      data:{
+        labels:["Entradas (R)", "Entradas (P)", "Saídas (R)", "Saídas (P)"],
+        datasets:[{ label:"R$", data:[inR, inP, outR, outP], backgroundColor:[C_IN_R, C_IN_P, C_OUT_R, C_OUT_P], borderWidth:1 }]
+      },
+      options:{
+        responsive:true,
+        plugins:{ tooltip:{ callbacks:{ label:(c)=> money(c.raw) } } },
+        scales:{ y:{ ticks:{ callback:(v)=> money(v) } } }
+      }
+    });
+  }
 
   renderMonthGroup();
 }
@@ -2465,16 +2470,18 @@ function renderYear(){
     ]
   };
 
-  if(chartYear) chartYear.destroy();
-  chartYear = new Chart(ctx, {
-    type:"bar",
-    data,
-    options:{
-      responsive:true,
-      plugins:{ tooltip:{ callbacks:{ label:(c)=> `${c.dataset.label}: ${money(c.raw)}` } } },
-      scales:{ y:{ ticks:{ callback:(v)=> money(v) } } }
-    }
-  });
+  if(hasChart){
+    if(chartYear) chartYear.destroy();
+    chartYear = new Chart(ctx, {
+      type:"bar",
+      data,
+      options:{
+        responsive:true,
+        plugins:{ tooltip:{ callbacks:{ label:(c)=> `${c.dataset.label}: ${money(c.raw)}` } } },
+        scales:{ y:{ ticks:{ callback:(v)=> money(v) } } }
+      }
+    });
+  }
 }
 document.getElementById("yearPick").addEventListener("change", renderYear);
 
