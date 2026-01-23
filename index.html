@@ -277,7 +277,10 @@
       background: currentColor;
     }
     .subLine{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-    .subLine .part{ display:inline-flex; align-items:center; }
+    .subLine .part{ display:inline-flex; align-items:center; gap:6px; }
+    .subLine .amount{ font-weight:800; }
+    .subLine .inReal{ color: var(--in-real); font-weight:800; }
+    .subLine .outReal{ color: var(--out-real); font-weight:800; }
     .subLine .inPend{ color: var(--in-pend); font-weight:800; }
     .subLine .outPend{ color: var(--out-pend); font-weight:800; }
     .subLine .saldoText{ color: var(--saldo); font-weight:800; }
@@ -588,7 +591,7 @@
       <div class="kpis">
         <div class="kpi revenue">
           <div class="meta">
-            <div class="label">Entradas (mês)</div>
+            <div class="label">Entradas (Mês Atual)</div>
             <div class="value" id="kpiRev">R$ 0,00</div>
             <div class="sub" id="kpiRevSub">—</div>
           </div>
@@ -603,7 +606,7 @@
 
         <div class="kpi expense">
           <div class="meta">
-            <div class="label">Saídas (mês)</div>
+            <div class="label">Saídas (Mês Atual)</div>
             <div class="value" id="kpiExp">R$ 0,00</div>
             <div class="sub" id="kpiExpSub">—</div>
           </div>
@@ -618,7 +621,7 @@
 
         <div class="kpi balance">
           <div class="meta">
-            <div class="label">Saldo (mês)</div>
+            <div class="label">Saldo (Mês Atual)</div>
             <div class="value" id="kpiBal">R$ 0,00</div>
             <div class="sub" id="kpiBalSub">—</div>
           </div>
@@ -1573,10 +1576,12 @@ function currentMonth(){
 function sumMonth(month){
   const list = state.transacoes.map(txResolvedRow).filter(t=>monthKey(t.date)===month);
   const realized = list.filter(t=>t.status==="realizada");
+  const pending = list.filter(t=>t.status==="pendente");
   const revR = realized.filter(t=>t.tipo==="entrada").reduce((a,b)=>a+b.valor,0);
   const expR = realized.filter(t=>t.tipo==="saida").reduce((a,b)=>a+b.valor,0);
-  const pend = list.filter(t=>t.status==="pendente").length;
-  return { revR, expR, balR: revR-expR, countR: realized.length, pendCount: pend };
+  const revP = pending.filter(t=>t.tipo==="entrada").reduce((a,b)=>a+b.valor,0);
+  const expP = pending.filter(t=>t.tipo==="saida").reduce((a,b)=>a+b.valor,0);
+  return { revR, expR, balR: revR-expR, revP, expP, balP: revP-expP };
 }
 
 /* ==========================
@@ -2016,19 +2021,19 @@ function renderDash(){
 
   document.getElementById("kpiRevSub").innerHTML =
     `<div class="subLine">
-      <span class="part"><span class="dot" style="color:var(--in-real)"></span>${s.countR} realizadas</span>
-      <span class="part inPend"><span class="dot"></span>${s.pendCount} pendentes</span>
+      <span class="part inReal"><span class="dot"></span>Realizadas <span class="amount">${money(s.revR)}</span></span>
+      <span class="part inPend"><span class="dot"></span>Pendentes <span class="amount">${money(s.revP)}</span></span>
      </div>`;
 
   document.getElementById("kpiExpSub").innerHTML =
     `<div class="subLine">
-      <span class="part"><span class="dot" style="color:var(--out-real)"></span>${s.countR} realizadas</span>
-      <span class="part outPend"><span class="dot"></span>${s.pendCount} pendentes</span>
+      <span class="part outReal"><span class="dot"></span>Realizadas <span class="amount">${money(s.expR)}</span></span>
+      <span class="part outPend"><span class="dot"></span>Pendentes <span class="amount">${money(s.expP)}</span></span>
      </div>`;
 
   document.getElementById("kpiBalSub").innerHTML =
     `<div class="subLine">
-      <span class="part saldoText"><span class="dot"></span>Saldo (realizadas)</span>
+      <span class="part saldoText"><span class="dot"></span>Saldo (não realizado)</span>
      </div>`;
 
   const tbody = document.getElementById("dashLastTbody");
